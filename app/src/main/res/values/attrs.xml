@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomCircleMenu">
+        <attr name="backgroundColor" format="color"/>
+        <attr name="colorChosenSector" format="color"/>
+        <attr name="colorMainBorder" format="color"/>
+        <attr name="widthMainBorder" format="float"/>
+
+        <attr name="circleRadius" format="integer"/>
+        <attr name="numberOfSectors" format="integer"/>
+    </declare-styleable>
+</resources>

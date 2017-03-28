@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<LinearLayout
+    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.shtainyky.customview.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
 
-</android.support.constraint.ConstraintLayout>
+    <com.shtainyky.customview.views.CustomCircleMenu
+        android:id="@+id/first"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:padding="40dp"
+        app:backgroundColor="@color/colorAccent"
+        app:circleRadius="220"
+        app:colorMainBorder="@color/colorPrimary"
+        app:colorChosenSector="@android:color/holo_green_dark"
+        app:widthMainBorder="15.0"
+        app:numberOfSectors="5"
+       />
+    <com.shtainyky.customview.views.CustomCircleMenu
+        android:id="@+id/second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        app:backgroundColor="@color/colorAccent"
+        app:circleRadius="300"
+        app:colorMainBorder="@color/colorPrimary"
+        app:colorChosenSector="@android:color/holo_green_dark"
+        app:widthMainBorder="15.0"
+        app:numberOfSectors="5"
+        />
+
+
+
+
+</LinearLayout>
