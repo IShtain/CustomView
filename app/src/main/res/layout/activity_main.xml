@@ -12,27 +12,27 @@
     <com.shtainyky.customview.views.CustomCircleMenu
         android:id="@+id/first"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:padding="40dp"
-        app:backgroundColor="@color/colorAccent"
-        app:circleRadius="220"
-        app:colorMainBorder="@color/colorPrimary"
-        app:colorChosenSector="@android:color/holo_green_dark"
-        app:widthMainBorder="15.0"
-        app:numberOfSectors="5"
-       />
-    <com.shtainyky.customview.views.CustomCircleMenu
-        android:id="@+id/second"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:layout_height="350dp"
+        android:padding="10dp"
         app:backgroundColor="@color/colorAccent"
         app:circleRadius="300"
         app:colorMainBorder="@color/colorPrimary"
         app:colorChosenSector="@android:color/holo_green_dark"
         app:widthMainBorder="15.0"
         app:numberOfSectors="5"
-        />
+       />
+    <!--<com.shtainyky.customview.views.CustomCircleMenu-->
+        <!--android:id="@+id/second"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:padding="15dp"-->
+        <!--app:backgroundColor="@color/colorAccent"-->
+        <!--app:circleRadius="300"-->
+        <!--app:colorMainBorder="@color/colorPrimary"-->
+        <!--app:colorChosenSector="@android:color/holo_green_dark"-->
+        <!--app:widthMainBorder="15.0"-->
+        <!--app:numberOfSectors="6"-->
+        <!--/>-->
 
 
 
