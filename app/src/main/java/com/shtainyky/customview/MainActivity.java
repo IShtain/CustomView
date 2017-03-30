@@ -13,16 +13,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_two);
 
-        CustomCircleMenu customCircleMenu = (CustomCircleMenu) findViewById(R.id.first);
-        List<Integer> arrayIcons = new ArrayList<>();
-        arrayIcons.add(R.drawable.ic_action_add);
-        arrayIcons.add(R.drawable.ic_action_email);
-        arrayIcons.add(R.drawable.ic_action_location);
-        arrayIcons.add(R.drawable.ic_action_message);
-        arrayIcons.add(R.drawable.ic_action_name);
-        customCircleMenu.setIconsForMenu(arrayIcons);
+//        CustomCircleMenu customCircleMenu = (CustomCircleMenu) findViewById(R.id.first);
+//        List<Integer> arrayIcons = new ArrayList<>();
+//        arrayIcons.add(R.drawable.ic_action_add);
+//        arrayIcons.add(R.drawable.ic_action_email);
+//        arrayIcons.add(R.drawable.ic_action_location);
+//        arrayIcons.add(R.drawable.ic_action_message);
+//        arrayIcons.add(R.drawable.ic_action_name);
+//        customCircleMenu.setIconsForMenu(arrayIcons);
 
 
     }

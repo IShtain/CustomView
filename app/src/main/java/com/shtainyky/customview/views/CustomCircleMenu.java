@@ -1,6 +1,7 @@
 package com.shtainyky.customview.views;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -36,7 +37,12 @@ public class CustomCircleMenu extends View {
 
     private float startX = 0;
     private float startY = 0;
-    private float startRadius = -90;
+    private float endX = 0;
+    private float endY = 0;
+    private float endRadiusX = 0;
+    private float endRadiusY = 0;
+
+
     private int angle;
 
     private float mCenterX, mCenterY;
@@ -98,6 +104,9 @@ public class CustomCircleMenu extends View {
         mCenterX = getWidth() / 2;
         mCenterY = getHeight() / 2;
 
+        endRadiusX = mCenterX;
+        endRadiusY = mCenterY - circleRadius;
+
     }
 
 
@@ -128,7 +137,7 @@ public class CustomCircleMenu extends View {
         mBackgroundPaint.setColor(colorMainBorder);
         mPath.reset();
         mPath.moveTo(mCenterX, mCenterY);
-        mPath.lineTo(mCenterX, mCenterY - circleRadius);
+        mPath.lineTo(endRadiusX, endRadiusY);
         if (numberOfSectors == 0)
             throw new IllegalArgumentException("Amount of sectors can not be equal zero");
         mMatrix.reset();
@@ -147,7 +156,7 @@ public class CustomCircleMenu extends View {
         mBackgroundPaint.setColor(colorChosenSector);
         mRectF.set(mCenterX - circleRadius, mCenterY - circleRadius,
                 mCenterX + circleRadius, mCenterY + circleRadius);
-        canvas.drawArc(mRectF, startRadius, angle, true, mBackgroundPaint);
+        canvas.drawArc(mRectF, -90, angle, true, mBackgroundPaint);
     }
 
     private void drawMenuIcon(Canvas canvas) {
@@ -197,28 +206,30 @@ public class CustomCircleMenu extends View {
                 Log.d("myLog", "Action was ACTION_DOWN");
                 startX = event.getX();
                 startY = event.getY();
+                endX = 0;
+                endY = 0;
                 Log.d("myLog", "startX x = " + startX);
                 Log.d("myLog", "startY y = " + startY);
                 break;
             case (MotionEvent.ACTION_MOVE):
                 Log.d("myLog", "Action was ACTION_MOVE");
-                double endX = event.getX();
-                double endY = event.getY();
-                if (Double.isNaN(endX) || Double.isNaN(endY)) break;
-                double angle;
+                endX = event.getX();
+                endY = event.getY();
+                if (Double.isNaN(endX) || Double.isNaN(endY)) invalidate();
+                double angle1;
                 double absVector1 = Math.pow(startX * startX + startY * startY, 0.5);
                 double absVector2 = Math.pow(endX * endX + endY * endY, 0.5);
-                if (absVector1 == 0 || absVector2 == 0) angle = 0;
+                if (absVector1 == 0 || absVector2 == 0) angle1 = 0;
                 else {
                     double cosAngle = (startX * endX + startY * endY) / (absVector1 * absVector2);
-                    angle = Math.acos(cosAngle);
+                    angle1 = Math.acos(cosAngle);
                 }
                 Log.d("myLog", "angle" + angle * 360);
                 if (endX - startX >= 0) {
-                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", 0, (float) angle * 360);
+                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", 0, (float) angle1 * 360);
                     Log.d("myLog", "Action was ACTION_MOVE ++++");
                 } else {
-                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", (float) angle * 360, 0);
+                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", (float) angle1 * 360, 0);
                     Log.d("myLog", "Action was ACTION_MOVE ----");
                 }
 
@@ -226,20 +237,29 @@ public class CustomCircleMenu extends View {
                 Log.d("myLog", "startY y = " + startY);
                 Log.d("myLog", "x = " + endX);
                 Log.d("myLog", "y = " + endY);
-                rotateAnim.setDuration(500);
-                rotateAnim.setRepeatMode(ObjectAnimator.RESTART);
+                rotateAnim.setRepeatMode(ValueAnimator.RESTART);
+                rotateAnim.setDuration(2000);
                 rotateAnim.start();
+
+                invalidate();
+
                 break;
 
             case (MotionEvent.ACTION_UP):
                 Log.d("myLog", "Action was ACTION_UP");
-                startX = 0;
-                startY = 0;
                 Log.d("myLog", "startX x = " + startX);
                 Log.d("myLog", "startY y = " + startY);
-                break;
-            case (MotionEvent.ACTION_CANCEL):
-                Log.d("myLog", "Action was ACTION_CANCEL");
+                if (endX == 0 && endY == 0) {
+                    float touchRadius = (float) Math.sqrt(Math.pow(startX - mCenterX, 2)
+                            + Math.pow(startY - mCenterY, 2));
+                    if (touchRadius < circleRadius) {
+                        Log.d("myLog", "TOUCH INSIDE THE CIRCLE! ");
+                    }
+                }
+                startX = 0;
+                startY = 0;
+                Log.d("myLog", "endX x = " + endX);
+                Log.d("myLog", "endY y = " + endY);
                 break;
 
 

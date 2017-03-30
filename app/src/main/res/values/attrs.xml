@@ -9,4 +9,10 @@
         <attr name="circleRadius" format="integer"/>
         <attr name="numberOfSectors" format="integer"/>
     </declare-styleable>
+
+    <declare-styleable name="CustomProgressView">
+        <attr name="backgroundFiguresColor" format="color"/>
+        <attr name="lengthSquareSide" format="integer"/>
+        <attr name="distanceBetweenSquares" format="integer"/>
+    </declare-styleable>
 </resources>
