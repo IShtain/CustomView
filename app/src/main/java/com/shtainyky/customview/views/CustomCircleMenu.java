@@ -113,6 +113,8 @@ public class CustomCircleMenu extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (numberOfSectors == 0)
+            throw new IllegalArgumentException("Amount of sectors can not be equal zero");
         angle = 360 / numberOfSectors;
         fillCircleBackground(canvas);
         drawSectors(canvas);
@@ -138,8 +140,6 @@ public class CustomCircleMenu extends View {
         mPath.reset();
         mPath.moveTo(mCenterX, mCenterY);
         mPath.lineTo(endRadiusX, endRadiusY);
-        if (numberOfSectors == 0)
-            throw new IllegalArgumentException("Amount of sectors can not be equal zero");
         mMatrix.reset();
         mMatrix.setTranslate(mCenterX, mCenterY);
         for (int i = 0; i < numberOfSectors; i++) {
@@ -198,8 +198,6 @@ public class CustomCircleMenu extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        ObjectAnimator rotateAnim;
-
         int action = MotionEventCompat.getActionMasked(event);
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
@@ -225,6 +223,7 @@ public class CustomCircleMenu extends View {
                     angle1 = Math.acos(cosAngle);
                 }
                 Log.d("myLog", "angle" + angle * 360);
+                ObjectAnimator rotateAnim;
                 if (endX - startX >= 0) {
                     rotateAnim = ObjectAnimator.ofFloat(this, "rotation", 0, (float) angle1 * 360);
                     Log.d("myLog", "Action was ACTION_MOVE ++++");
@@ -240,7 +239,6 @@ public class CustomCircleMenu extends View {
                 rotateAnim.setRepeatMode(ValueAnimator.RESTART);
                 rotateAnim.setDuration(2000);
                 rotateAnim.start();
-
                 invalidate();
 
                 break;
