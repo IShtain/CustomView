@@ -1,7 +1,6 @@
 package com.shtainyky.customview.views;
 
 
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -59,7 +58,7 @@ public class CustomProgressView extends View {
 
         mRectF = new RectF();
         mPath = new Path();
-        startInnerSquareBlinkingAnimation();
+        startAnimation();
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
@@ -136,85 +135,21 @@ public class CustomProgressView extends View {
 
     }
 
-    private void startInnerSquareBlinkingAnimation() {
-        ValueAnimator blinkAnimator = ValueAnimator.ofInt(90, 0);
-        blinkAnimator.setDuration(1500);
-        blinkAnimator.setRepeatCount(2);
-        blinkAnimator.setRepeatMode(ValueAnimator.RESTART);
-        blinkAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                blinkAlpfa = (int) animator.getAnimatedValue();
-                invalidate();
-            }
-        });
 
-        blinkAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
 
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                Log.d("myLog", "startInnerSquareBlinkingAnimation =>>>>>>> onAnimationEnd");
-                startFirstMovingSquareAnimation();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        if (!blinkAnimator.isStarted()) {
-            blinkAnimator.start();
-        }
-        Log.d("myLog", "startInnerSquareBlinkingAnimation = ");
-    }
-
-    private void startFirstMovingSquareAnimation() {
+    private void startAnimation() {
+        ValueAnimator blinkBigSquareAnimator = getBlinkBigSquareAnimator();
         ValueAnimator moveRightBottomYAnimator = getMovedRightBottomYAnimator();
         ValueAnimator moveRightTopXAnimator = getMovedRightTopXAnimator();
         ValueAnimator moveLeftTopYAnimator = getMovedLeftTopYAnimator();
         ValueAnimator moveLeftBottomXAnimator = getMovedLeftBottomXAnimator();
 
-        AnimatorSet animatorSetFirst = new AnimatorSet();
-        animatorSetFirst.play(moveLeftBottomXAnimator)
-                .after(moveRightBottomYAnimator)
-                .before(moveLeftTopYAnimator);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(blinkBigSquareAnimator, moveRightBottomYAnimator,
+                moveLeftBottomXAnimator, moveLeftTopYAnimator, moveRightTopXAnimator);
 
-        AnimatorSet animatorSetSecond = new AnimatorSet();
-        animatorSetSecond.play(animatorSetFirst).before(moveRightTopXAnimator);
-        animatorSetSecond.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                startInnerSquareBlinkingAnimation();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        if (!animatorSetSecond.isStarted()) {
-            animatorSetSecond.start();
+        if (!animatorSet.isStarted()) {
+            animatorSet.start();
         }
     }
 
@@ -278,7 +213,18 @@ public class CustomProgressView extends View {
         return moveLeftBottomXAnimator;
     }
 
-    private void startSecondMovingSquareAnimation() {
-
+    private ValueAnimator getBlinkBigSquareAnimator() {
+        ValueAnimator blinkAnimator = ValueAnimator.ofInt(90, 0);
+        blinkAnimator.setDuration(1000);
+        blinkAnimator.setRepeatCount(2);
+        blinkAnimator.setRepeatMode(ValueAnimator.RESTART);
+        blinkAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                blinkAlpfa = (int) animator.getAnimatedValue();
+                invalidate();
+            }
+        });
+        return blinkAnimator;
     }
 }
