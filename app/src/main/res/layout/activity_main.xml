@@ -1,40 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     tools:context="com.shtainyky.customview.MainActivity">
 
-
-    <com.shtainyky.customview.views.CustomCircleMenu
-        android:id="@+id/first"
+    <com.shtainyky.customview.views.CustomProgressView
+        android:id="@+id/progress"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:padding="10dp"
-        app:backgroundColor="@color/colorAccent"
-        app:circleRadius="300"
-        app:colorMainBorder="@color/colorPrimary"
-        app:colorChosenSector="@android:color/holo_green_dark"
-        app:widthMainBorder="15.0"
-        app:numberOfSectors="5"
-       />
+        android:layout_height="300dp"
+        app:distanceBetweenSquares="200"
+        app:lengthSquareSide="30"
+        />
+
+
     <!--<com.shtainyky.customview.views.CustomCircleMenu-->
-        <!--android:id="@+id/second"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:padding="15dp"-->
-        <!--app:backgroundColor="@color/colorAccent"-->
-        <!--app:circleRadius="300"-->
-        <!--app:colorMainBorder="@color/colorPrimary"-->
-        <!--app:colorChosenSector="@android:color/holo_green_dark"-->
-        <!--app:widthMainBorder="15.0"-->
-        <!--app:numberOfSectors="6"-->
-        <!--/>-->
-
-
+    <!--android:id="@+id/first"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="350dp"-->
+    <!--android:padding="10dp"-->
+    <!--app:backgroundColor="@color/colorAccent"-->
+    <!--app:circleRadius="300"-->
+    <!--app:colorMainBorder="@color/colorPrimary"-->
+    <!--app:colorChosenSector="@android:color/holo_green_dark"-->
+    <!--app:widthMainBorder="15.0"-->
+    <!--app:numberOfSectors="5"-->
+    <!--/>-->
+    <!--<com.shtainyky.customview.views.CustomCircleMenu-->
+    <!--android:id="@+id/second"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:padding="15dp"-->
+    <!--app:backgroundColor="@color/colorAccent"-->
+    <!--app:circleRadius="300"-->
+    <!--app:colorMainBorder="@color/colorPrimary"-->
+    <!--app:colorChosenSector="@android:color/holo_green_dark"-->
+    <!--app:widthMainBorder="15.0"-->
+    <!--app:numberOfSectors="6"-->
+    <!--/>-->
 
 
 </LinearLayout>

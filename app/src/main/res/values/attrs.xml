@@ -11,7 +11,8 @@
     </declare-styleable>
 
     <declare-styleable name="CustomProgressView">
-        <attr name="backgroundFiguresColor" format="color"/>
+        <attr name="backgroundSmallSquaresColor" format="color"/>
+        <attr name="backgroundBigSquareColor" format="color"/>
         <attr name="lengthSquareSide" format="integer"/>
         <attr name="distanceBetweenSquares" format="integer"/>
     </declare-styleable>
