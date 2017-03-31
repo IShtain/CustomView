@@ -73,6 +73,7 @@ public class CustomProgressView extends View {
 
     private void init(Context context) {
         mBackgroundSmallSquareColor = ContextCompat.getColor(context, DEFAULT_BACKGROUND_SMALL_SQUARE_COLOR);
+        mBackgroundBigSquareColor = ContextCompat.getColor(context, DEFAULT_BACKGROUND_BIG_SQUARE_COLOR);
         mLengthSquareSide = DEFAULT_LENGTH_SQUARE_SIDE;
         mDistanceBetweenSquares = DEFAULT_DISTANCE_BETWEEN_SQUARES;
         initMainUtil();
