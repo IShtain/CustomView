@@ -107,10 +107,19 @@ public class CustomProgressView extends View {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int size =  mLengthSquareSide + mDistanceBetweenSquares;
+        int width = resolveSizeAndState(size, widthMeasureSpec, 0);
+        int height = resolveSizeAndState(size, heightMeasureSpec, 0);
+
+        setMeasuredDimension(width, height);
+    }
+
+    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mCenterX = getWidth() / 2;
-        mCenterY = getHeight() / 2;
+        mCenterX = getWidth() / 2 - mLengthSquareSide/2;
+        mCenterY = getHeight() / 2 - mLengthSquareSide/2;
         //initialization coordinates for small squares
         mLeftTopX = mCenterX - mDistanceBetweenSquares / 2;
         mLeftTopY = mCenterY - mDistanceBetweenSquares / 2;

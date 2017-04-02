@@ -6,14 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.shtainyky.customview.MainActivity">
+    tools:context="com.shtainyky.customview.MainActivity"
+    android:weightSum="1">
 
     <com.shtainyky.customview.views.CustomProgressView
         android:id="@+id/progress"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:distanceBetweenSquares="200"
         app:lengthSquareSide="30"
+        android:layout_gravity="center"
         />
 
 
