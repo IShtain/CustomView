@@ -1,6 +1,5 @@
 package com.shtainyky.customview.views;
 
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
@@ -17,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -37,13 +37,14 @@ public class CustomCircleMenu extends View {
 
     private float startX = 0;
     private float startY = 0;
-    private float endX = 0;
-    private float endY = 0;
-    private float endRadiusX = 0;
-    private float endRadiusY = 0;
+    private boolean isRotating;
+    private boolean allowsRotating;
+    private boolean[] quadrantTouched;
 
 
-    private int angle;
+    private int mAngleOneSector;
+    private float mStartAngle;
+    private double startMovingAngle;
 
     private float mCenterX, mCenterY;
     private Paint mBackgroundPaint;
@@ -52,15 +53,19 @@ public class CustomCircleMenu extends View {
     private RectF mRectF;
     private Resources resources;
     private List<Bitmap> bitmaps = new ArrayList<>();
+    private final GestureDetector gestureDetector;
+    private ValueAnimator rotateAnimator;
 
 
     public CustomCircleMenu(Context context) {
         super(context);
+        gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context);
     }
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context, attrs);
         init(context);
 
@@ -69,6 +74,7 @@ public class CustomCircleMenu extends View {
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context, attrs);
         init(context);
     }
@@ -96,6 +102,16 @@ public class CustomCircleMenu extends View {
         mMatrix = new Matrix();
         mRectF = new RectF();
         resources = context.getResources();
+        quadrantTouched = new boolean[]{false, false, false, false, false};
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int size = (int) (2 * circleRadius + 2 * widthMainBorder);
+        int width = resolveSizeAndState(size, widthMeasureSpec, 0);
+        int height = resolveSizeAndState(size, heightMeasureSpec, 0);
+
+        setMeasuredDimension(width, height);
     }
 
     @Override
@@ -103,10 +119,6 @@ public class CustomCircleMenu extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         mCenterX = getWidth() / 2;
         mCenterY = getHeight() / 2;
-
-        endRadiusX = mCenterX;
-        endRadiusY = mCenterY - circleRadius;
-
     }
 
 
@@ -115,7 +127,8 @@ public class CustomCircleMenu extends View {
         super.onDraw(canvas);
         if (numberOfSectors == 0)
             throw new IllegalArgumentException("Amount of sectors can not be equal zero");
-        angle = 360 / numberOfSectors;
+        mAngleOneSector = 360 / numberOfSectors;
+        Log.d("myLog", "onDraw mStartAngle = " + mStartAngle);
         fillCircleBackground(canvas);
         drawSectors(canvas);
         fillChosenSector(canvas);
@@ -137,18 +150,27 @@ public class CustomCircleMenu extends View {
         mBackgroundPaint.setStyle(Paint.Style.STROKE);
         mBackgroundPaint.setStrokeWidth(widthMainBorder / 2);
         mBackgroundPaint.setColor(colorMainBorder);
-        mPath.reset();
-        mPath.moveTo(mCenterX, mCenterY);
-        mPath.lineTo(endRadiusX, endRadiusY);
-        mMatrix.reset();
-        mMatrix.setTranslate(mCenterX, mCenterY);
+//        mPath.reset();
+//        mPath.moveTo(mCenterX, mCenterY);
+//        mPath.lineTo(endRadiusX, endRadiusY);
+//        mMatrix.reset();
+//        mMatrix.setTranslate(mCenterX, mCenterY);
+//        for (int i = 0; i < numberOfSectors; i++) {
+//            mMatrix.setRotate(mAngleOneSector, mCenterX, mCenterY);
+//            mPath.transform(mMatrix);
+//            canvas.drawPath(mPath, mBackgroundPaint);
+//            mMatrix.reset();
+//        }
+
+
+        mRectF.set(mCenterX - circleRadius, mCenterY - circleRadius,
+                mCenterX + circleRadius, mCenterY + circleRadius);
         for (int i = 0; i < numberOfSectors; i++) {
-            mMatrix.setRotate(angle, mCenterX, mCenterY);
-            mPath.transform(mMatrix);
-            canvas.drawPath(mPath, mBackgroundPaint);
-            mMatrix.reset();
+            canvas.drawArc(mRectF, mStartAngle + i * mAngleOneSector, mAngleOneSector, true, mBackgroundPaint);
         }
+
     }
+
 
     private void fillChosenSector(Canvas canvas) {
         //fill sector
@@ -156,22 +178,33 @@ public class CustomCircleMenu extends View {
         mBackgroundPaint.setColor(colorChosenSector);
         mRectF.set(mCenterX - circleRadius, mCenterY - circleRadius,
                 mCenterX + circleRadius, mCenterY + circleRadius);
-        canvas.drawArc(mRectF, -90, angle, true, mBackgroundPaint);
+        canvas.drawArc(mRectF, mStartAngle, mAngleOneSector, true, mBackgroundPaint);
     }
 
     private void drawMenuIcon(Canvas canvas) {
         //draw sector's icon
         if (bitmaps != null)
             if (bitmaps.size() > 0) {
-                Log.d("myLog", "bitmaps.size() = " + bitmaps.size());
+                // Log.d("myLog", "bitmaps.size() = " + bitmaps.size());
                 mMatrix.reset();
-                mMatrix.preTranslate(mCenterX - bitmaps.get(0).getWidth() / 2, mCenterY - circleRadius + bitmaps.get(0).getHeight());
-                mMatrix.postRotate(angle / 2, mCenterX, mCenterY);
+                mMatrix.setTranslate((float) (mCenterX + 2 * circleRadius * Math.cos(Math.toRadians(mStartAngle)) / 3 - bitmaps.get(0).getHeight() / 2),
+                        (float) (mCenterY + 2 * circleRadius * Math.sin(Math.toRadians(mStartAngle)) / 3) - bitmaps.get(0).getHeight() / 2);
+                mMatrix.postRotate(mAngleOneSector / 2, mCenterX, mCenterY);
                 canvas.drawBitmap(bitmaps.get(0), mMatrix, null);
+
                 for (int i = 1; i < numberOfSectors; i++) {
-                    mMatrix.postRotate(angle, mCenterX, mCenterY);
+                    mMatrix.postRotate(mAngleOneSector, mCenterX, mCenterY);
                     canvas.drawBitmap(bitmaps.get(i), mMatrix, null);
                 }
+//                mMatrix.reset();
+//                mMatrix.postTranslate((float) (mCenterX + circleRadius * Math.sin(mAngleOneSector * Math.PI / 360) - bitmaps.get(0).getWidth() / 2),
+//                        (float) (mCenterY + circleRadius * Math.cos(mAngleOneSector * Math.PI / 360) - bitmaps.get(0).getHeight())/2);
+//                mMatrix.setRotate(mAngleOneSector, mCenterX, mCenterY);
+//                canvas.drawBitmap(bitmaps.get(0), mMatrix, null);
+//                for (int i = 1; i < numberOfSectors; i++) {
+//                    mMatrix.postRotate(mAngleOneSector, mCenterX, mCenterY);
+//                    canvas.drawBitmap(bitmaps.get(i), mMatrix, null);
+//                }
 
             }
     }
@@ -195,74 +228,143 @@ public class CustomCircleMenu extends View {
         canvas.drawCircle(mCenterX, mCenterY, circleRadius, mBackgroundPaint);
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = MotionEventCompat.getActionMasked(event);
-        switch (action) {
-            case (MotionEvent.ACTION_DOWN):
-                Log.d("myLog", "Action was ACTION_DOWN");
-                startX = event.getX();
-                startY = event.getY();
-                endX = 0;
-                endY = 0;
-                Log.d("myLog", "startX x = " + startX);
-                Log.d("myLog", "startY y = " + startY);
-                break;
-            case (MotionEvent.ACTION_MOVE):
-                Log.d("myLog", "Action was ACTION_MOVE");
-                endX = event.getX();
-                endY = event.getY();
-                if (Double.isNaN(endX) || Double.isNaN(endY)) invalidate();
-                double angle1;
-                double absVector1 = Math.pow(startX * startX + startY * startY, 0.5);
-                double absVector2 = Math.pow(endX * endX + endY * endY, 0.5);
-                if (absVector1 == 0 || absVector2 == 0) angle1 = 0;
-                else {
-                    double cosAngle = (startX * endX + startY * endY) / (absVector1 * absVector2);
-                    angle1 = Math.acos(cosAngle);
-                }
-                Log.d("myLog", "angle" + angle * 360);
-                ObjectAnimator rotateAnim;
-                if (endX - startX >= 0) {
-                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", 0, (float) angle1 * 360);
-                    Log.d("myLog", "Action was ACTION_MOVE ++++");
-                } else {
-                    rotateAnim = ObjectAnimator.ofFloat(this, "rotation", (float) angle1 * 360, 0);
-                    Log.d("myLog", "Action was ACTION_MOVE ----");
-                }
-
-                Log.d("myLog", "startX x = " + startX);
-                Log.d("myLog", "startY y = " + startY);
-                Log.d("myLog", "x = " + endX);
-                Log.d("myLog", "y = " + endY);
-                rotateAnim.setRepeatMode(ValueAnimator.RESTART);
-                rotateAnim.setDuration(2000);
-                rotateAnim.start();
-                invalidate();
-
-                break;
-
-            case (MotionEvent.ACTION_UP):
-                Log.d("myLog", "Action was ACTION_UP");
-                Log.d("myLog", "startX x = " + startX);
-                Log.d("myLog", "startY y = " + startY);
-                if (endX == 0 && endY == 0) {
-                    float touchRadius = (float) Math.sqrt(Math.pow(startX - mCenterX, 2)
-                            + Math.pow(startY - mCenterY, 2));
-                    if (touchRadius < circleRadius) {
-                        Log.d("myLog", "TOUCH INSIDE THE CIRCLE! ");
+        float touchRadius = (float) Math.sqrt(Math.pow(event.getX() - mCenterX, 2)
+                + Math.pow(event.getY() - mCenterY, 2));
+        //all movement inside circle
+        if (touchRadius < circleRadius) {
+            Log.d("newOne", "Action was inside");
+            gestureDetector.onTouchEvent(event);
+            int action = MotionEventCompat.getActionMasked(event);
+            switch (action) {
+                case (MotionEvent.ACTION_DOWN):
+                    Log.d("newOne", "Action was ACTION_DOWN");
+                    //reset rotating
+                    if (rotateAnimator != null && rotateAnimator.isStarted())
+                        rotateAnimator.cancel();
+                    // reset the touched quadrants
+                    for (int i = 0; i < quadrantTouched.length; i++) {
+                        quadrantTouched[i] = false;
                     }
-                }
-                startX = 0;
-                startY = 0;
-                Log.d("myLog", "endX x = " + endX);
-                Log.d("myLog", "endY y = " + endY);
-                break;
+                    //turn mStartAngle between 0 and 360 degrees
+                    if (mStartAngle > 360 || mStartAngle < -360)
+                        mStartAngle = mStartAngle % 360;
+                    startX = event.getX();
+                    startY = event.getY();
+                    startMovingAngle = getAngle(startX, startY);
+                    Log.d("myLog", "startX x = " + startX);
+                    Log.d("myLog", "startY y = " + startY);
+                    break;
 
+                case (MotionEvent.ACTION_MOVE):
+                    Log.d("myLog", "Action was ACTION_MOVE");
+                    double currentAngle = getAngle(event.getX(), event.getY());
+                    mStartAngle = mStartAngle + (float) (currentAngle - startMovingAngle);
+                    invalidate();
+                    Log.d("newOne", "Action was ACTION_MOVE diff = " + (currentAngle - startMovingAngle));
+                    startMovingAngle = currentAngle;
+                    break;
 
+                case (MotionEvent.ACTION_UP):
+                    Log.d("newOne", "Action was ACTION_UP");
+                    startX = event.getX();
+                    startY = event.getY();
+                    Log.d("myLog", "startX x = " + startX);
+                    Log.d("myLog", "startY y = " + startY);
+
+                    Log.d("myLog", "mStartAngle = " + mStartAngle);
+                    Log.d("myLog", "getAngle = " + getAngle(startX, startY));
+
+                    break;
+            }
+            // set the touched quadrant to true
+            quadrantTouched[getQuadrant(event.getX() - mCenterX, event.getY() - mCenterY)] = true;
         }
         return true;
+    }
+
+
+    private double getAngle(double xTouch, double yTouch) {
+        double x = xTouch - mCenterX;
+        double y = yTouch - mCenterY;
+
+        switch (getQuadrant(x, y)) {
+            case 1:
+                return Math.asin(y / Math.hypot(x, y)) * 180 / Math.PI;
+            case 2:
+                return 180 - Math.asin(y / Math.hypot(x, y)) * 180 / Math.PI;
+            case 3:
+                return 180 + (-1 * Math.asin(y / Math.hypot(x, y)) * 180 / Math.PI);
+            case 4:
+                return 360 + Math.asin(y / Math.hypot(x, y)) * 180 / Math.PI;
+            default:
+                return 0;
+        }
+    }
+
+    private int getQuadrant(double x, double y) {
+        if (x >= 0) {
+            return y >= 0 ? 1 : 4;
+        } else {
+            return y >= 0 ? 2 : 3;
+        }
+    }
+
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            if (mStartAngle > 360 || mStartAngle < -360)
+                mStartAngle = mStartAngle % 360;
+
+            rotateAnimator = ValueAnimator.ofInt(0, getDirectionAngle(e1, e2));
+            rotateAnimator.setDuration(1500);
+            rotateAnimator.setRepeatMode(ValueAnimator.RESTART);
+            rotateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    mStartAngle = mStartAngle + (int) animator.getAnimatedValue();
+                    invalidate();
+                }
+            });
+            rotateAnimator.start();
+
+            Log.d("newOne", "onFling");
+            return true;
+        }
+
+        private int getDirectionAngle(MotionEvent e1, MotionEvent e2) {
+            double fromAngle = getAngle(e1.getX(), e1.getY());
+            double toAngle = getAngle(e2.getX(), e2.getY());
+            int startQuadrant = getQuadrant(e1.getX() - mCenterX, e1.getY() - mCenterY);
+            int endQuadrant = getQuadrant(e2.getX() - mCenterX, e2.getY() - mCenterY);
+            final int end;
+            if ((startQuadrant == 1 && endQuadrant == 1 && fromAngle > toAngle)
+                    || (startQuadrant == 2 && endQuadrant == 2 && fromAngle > toAngle)
+                    || (startQuadrant == 3 && endQuadrant == 3 && fromAngle > toAngle)
+                    || (startQuadrant == 4 && endQuadrant == 4 && fromAngle > toAngle)
+                    || (startQuadrant == 1 && endQuadrant == 2 && quadrantTouched[3])
+                    || (startQuadrant == 1 && endQuadrant == 3 && quadrantTouched[4])
+                    || (startQuadrant == 1 && endQuadrant == 4 && !quadrantTouched[3])
+                    || (startQuadrant == 2 && endQuadrant == 1 && !quadrantTouched[3])
+                    || (startQuadrant == 2 && endQuadrant == 3 && quadrantTouched[4])
+                    || (startQuadrant == 2 && endQuadrant == 4 && quadrantTouched[1])
+                    || (startQuadrant == 3 && endQuadrant == 1 && quadrantTouched[2])
+                    || (startQuadrant == 3 && endQuadrant == 2 && !quadrantTouched[1])
+                    || (startQuadrant == 3 && endQuadrant == 4 && quadrantTouched[1])
+                    || (startQuadrant == 4 && endQuadrant == 1 && quadrantTouched[3])
+                    || (startQuadrant == 4 && endQuadrant == 2 && quadrantTouched[3])
+                    || (startQuadrant == 4 && endQuadrant == 3 && !quadrantTouched[2])) {
+
+                end = -1 * (int) Math.abs(toAngle - fromAngle);
+
+            } else {
+                // the normal rotation
+                end = (int) Math.abs(toAngle - fromAngle);
+            }
+            return end;
+        }
     }
 
     /*Getters  and setters*/
@@ -323,6 +425,11 @@ public class CustomCircleMenu extends View {
     public void setWidthMainBorder(float widthMainBorder) {
         this.widthMainBorder = widthMainBorder;
         invalidate();
+    }
+
+    public interface OnMenuIconClickListener {
+        void onIconClick(int drawableId);
+
     }
 
     public List<Integer> getIconsForMenu() {

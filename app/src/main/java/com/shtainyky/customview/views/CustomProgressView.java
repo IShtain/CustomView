@@ -22,7 +22,7 @@ import com.shtainyky.customview.R;
 public class CustomProgressView extends View {
 
     private final static int DEFAULT_DURATION_SHORT = 300;  //for moving
-    private final static int DEFAULT_DURATION_LONG = 800;   //for blinking
+    private final static int DEFAULT_DURATION_LONG = 500;   //for blinking
 
     private final static int DEFAULT_BACKGROUND_SMALL_SQUARE_COLOR = R.color.colorAccent;
     private final static int DEFAULT_BACKGROUND_BIG_SQUARE_COLOR = R.color.colorAccent;
@@ -183,7 +183,7 @@ public class CustomProgressView extends View {
     }
 
 
-    /* public methods for starting and canceling animation*/
+    /* public methods for starting and canceling animation */
     public void startAnimation() {
         mShouldStartEscalationSquareAnimation = true;
         mShouldStartConvolutionSquareAnimation = true;
