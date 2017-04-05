@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.shtainyky.customview.MainActivity"
-    android:weightSum="1">
+    >
 
     <!--<com.shtainyky.customview.views.CustomProgressView-->
         <!--android:id="@+id/progress"-->
@@ -29,22 +29,31 @@
     app:colorMainBorder="@color/colorPrimary"
     app:colorChosenSector="@android:color/holo_blue_light"
     app:widthMainBorder="15.0"
-    app:numberOfSectors="5"
+    app:numberOfSectors="6"
     android:layout_gravity="center"
     />
-    <com.shtainyky.customview.views.CustomCircleMenu
-    android:id="@+id/second"
-    android:layout_width="wrap_content"
-    android:layout_height="370dp"
-    android:padding="15dp"
-    app:backgroundColor="@color/colorAccent"
-    app:circleRadius="300"
-    app:colorMainBorder="@color/colorPrimary"
-    app:colorChosenSector="@android:color/holo_green_dark"
-    app:widthMainBorder="15.0"
-    app:numberOfSectors="3"
-    android:layout_gravity="center"
-    />
+
+    <ImageButton
+        android:id="@+id/iv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorAccent"
+        />
+    <!--<com.shtainyky.customview.views.CustomCircleMenu-->
+    <!--android:id="@+id/second"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="370dp"-->
+    <!--android:padding="15dp"-->
+    <!--app:backgroundColor="@color/colorAccent"-->
+    <!--app:circleRadius="300"-->
+    <!--app:colorMainBorder="@color/colorPrimary"-->
+    <!--app:colorChosenSector="@android:color/holo_green_dark"-->
+    <!--app:widthMainBorder="15.0"-->
+    <!--app:numberOfSectors="3"-->
+    <!--android:layout_gravity="center"-->
+    <!--/>-->
 
 
 </LinearLayout>
