@@ -28,6 +28,8 @@ public class CustomCircleMenu extends View {
 
     private final static int DEFAULT_DURATION_SHORT = 300;  //for chosen sector
     private final static int DEFAULT_DURATION_LONG = 1500;   //for fling
+    private final static String WARN_AMOUNT_OF_SECTORS = "Amount of sectors can not be equal zero";
+    private final static String WARN_AMOUNT_OF_ICONS = "Size of list of icon for menu must be equal amount of sectors and can not be equal zero";
 
     private int mBackgroundColor;
     private int mColorMainBorder;
@@ -37,8 +39,8 @@ public class CustomCircleMenu extends View {
     private float mWidthMainBorder;
     private List<Integer> mIconsForMenu;
 
-    private float mStartX;
-    private float mStartY;
+    private float mStartX = -1;
+    private float mStartY = -1;
     private boolean[] mQuadrantTouched;
     private int mAngleOneSector;
     private float mStartAngle;
@@ -67,8 +69,6 @@ public class CustomCircleMenu extends View {
         gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context, attrs);
         init(context);
-
-
     }
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -103,11 +103,10 @@ public class CustomCircleMenu extends View {
         mIconsForMenu = new ArrayList<>();
         mQuadrantTouched = new boolean[]{false, false, false, false, false};
         if (mNumberOfSectors == 0)
-            throw new IllegalArgumentException("Amount of sectors can not be equal zero");
+            throw new IllegalArgumentException(WARN_AMOUNT_OF_SECTORS);
         mAngleOneSector = 360 / mNumberOfSectors;
         mStartAngle = -90 - mAngleOneSector / 2;
         Log.d("myLog", "init mStartAngle = " + mStartAngle);
-
     }
 
     @Override
@@ -161,7 +160,6 @@ public class CustomCircleMenu extends View {
 
     }
 
-
     private void fillChosenSector(Canvas canvas) {
         //fill sector
         mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -176,28 +174,29 @@ public class CustomCircleMenu extends View {
         //draw sector's icon
         if (mBitmaps != null)
             if (mBitmaps.size() > 0) {
-                // Log.d("myLog", "mBitmaps.size() = " + mBitmaps.size());
-                mMatrix.reset();
-                mMatrix.setTranslate((float) (mCenterX + 2 * mCircleRadius * Math.cos(Math.toRadians(mStartAngle)) / 3 - mBitmaps.get(0).getHeight() / 2),
-                        (float) (mCenterY + 2 * mCircleRadius * Math.sin(Math.toRadians(mStartAngle)) / 3) - mBitmaps.get(0).getHeight() / 2);
-                mMatrix.postRotate(mAngleOneSector / 2, mCenterX, mCenterY);
-                canvas.drawBitmap(mBitmaps.get(0), mMatrix, null);
-
-                for (int i = 1; i < mNumberOfSectors; i++) {
-                    mMatrix.postRotate(mAngleOneSector, mCenterX, mCenterY);
-                    canvas.drawBitmap(mBitmaps.get(i), mMatrix, null);
+                for (int i = 0; i < mNumberOfSectors; i++) {
+                    canvas.drawBitmap(rotateBitmap(mBitmaps.get(i), mStartAngle + 90 + mAngleOneSector / 2 + mAngleOneSector * i), null,
+                            putBitmapTo((int) (mStartAngle + i * mAngleOneSector + mAngleOneSector / 2)), null);
                 }
-//                mMatrix.reset();
-//                mMatrix.postTranslate((float) (mCenterX + mCircleRadius * Math.sin(mAngleOneSector * Math.PI / 360) - mBitmaps.get(0).getWidth() / 2),
-//                        (float) (mCenterY + mCircleRadius * Math.cos(mAngleOneSector * Math.PI / 360) - mBitmaps.get(0).getHeight())/2);
-//                mMatrix.setRotate(mAngleOneSector, mCenterX, mCenterY);
-//                canvas.drawBitmap(mBitmaps.get(0), mMatrix, null);
-//                for (int i = 1; i < mNumberOfSectors; i++) {
-//                    mMatrix.postRotate(mAngleOneSector, mCenterX, mCenterY);
-//                    canvas.drawBitmap(mBitmaps.get(i), mMatrix, null);
-//                }
-
             }
+    }
+
+    private Bitmap rotateBitmap(Bitmap source, float angle) {
+        mMatrix.reset();
+        mMatrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), mMatrix, true);
+    }
+
+    private RectF putBitmapTo(int angle) {
+        float locationX = (float) (mCenterX + ((mCircleRadius / 17 * 11) * Math.cos(Math.toRadians(angle))));
+        float locationY = (float) (mCenterY + ((mCircleRadius / 17 * 11) * Math.sin(Math.toRadians(angle))));
+        RectF rectF = new RectF(locationX - mCircleRadius/8, locationY - mCircleRadius/8,
+                locationX + mCircleRadius/8, locationY + mCircleRadius/8);
+
+        mMatrix.reset();
+        mMatrix.setRotate(angle, locationX, locationY);
+        mMatrix.mapRect(rectF);
+        return rectF;
     }
 
     private void drawInnerCircle(Canvas canvas) {
@@ -240,51 +239,50 @@ public class CustomCircleMenu extends View {
                     //turn mStartAngle between 0 and 360 degrees or between -360 and 0
                     if (mStartAngle > 360 || mStartAngle < -360)
                         mStartAngle = mStartAngle % 360;
+                    //for detecting touched
                     mStartX = event.getX();
                     mStartY = event.getY();
                     mStartMovingAngle = getAngle(mStartX, mStartY);
-                    Log.d("newOne", "mStartX x = " + mStartX);
-                    Log.d("newOne", "mStartY y = " + mStartY);
                     break;
 
                 case (MotionEvent.ACTION_MOVE):
                     Log.d("myLog", "Action was ACTION_MOVE");
                     double currentAngle = getAngle(event.getX(), event.getY());
+                    // rotate circle after touched move
                     mStartAngle = mStartAngle + (float) (currentAngle - mStartMovingAngle);
                     invalidate();
-                    Log.d("newOne", "Action was ACTION_MOVE diff = " + (currentAngle - mStartMovingAngle));
                     mStartMovingAngle = currentAngle;
                     break;
 
                 case (MotionEvent.ACTION_UP):
                     Log.d("newOne", "Action was ACTION_UP");
+                    Log.d("newOne", "Action was ACTION_UP getAngle(mStartX, mStartY)" + getAngle(mStartX, mStartY));
                     if (mStartX == event.getX() && mStartY == event.getY()) {
-                        Log.d("newOne", "Action was ACTION_UP true!!!!!!");
-                        if (mStartAngle < 0) mStartAngle = mStartAngle + 360;
-                        double paintAngle = (getAngle(mStartX, mStartY) - mStartAngle) % 360;
-                        if (paintAngle < 0) paintAngle = paintAngle + 360;
-                        Log.d("newOne", "paintAngle = " + paintAngle);
+                        if (mStartAngle < 0)
+                            mStartAngle = mStartAngle + 360;  //turn mStartAngle between 0 and 360 degrees
+                        double angleOfChosenSector = (getAngle(mStartX, mStartY) - mStartAngle) % 360;
+                        if (angleOfChosenSector < 0)
+                            angleOfChosenSector = angleOfChosenSector + 360;
                         for (int i = 0; i < mNumberOfSectors; i++) {
-                            if ((mAngleOneSector * i <= paintAngle)
-                                    && (paintAngle < mAngleOneSector * (i + 1))) {
+                            if ((mAngleOneSector * i <= angleOfChosenSector)
+                                    && (angleOfChosenSector < mAngleOneSector * (i + 1))) {
                                 if (mOnMenuItemClickListener != null)
                                     mOnMenuItemClickListener.onIconClick(mIconsForMenu.get(i));
                                 mStartPaintingAngle = mAngleOneSector * i;
                                 invalidate();
-                                double animDiff =  (270 - mAngleOneSector/2 - mStartPaintingAngle - mStartAngle)%360;
-                                if (animDiff < -180) animDiff = 360 + animDiff;
-                                if (animDiff > 180) animDiff = -360 + animDiff;
+                                double animDiff = (270 - mAngleOneSector / 2 - mStartPaintingAngle - mStartAngle) % 360;
+                                if (animDiff <= -180) animDiff = 360 + animDiff;
+                                if (animDiff >= 180) animDiff = -360 + animDiff;
                                 Log.d("newOne", "mStartAngle = " + mStartAngle);
                                 Log.d("newOne", "getAngle = " + getAngle(mStartX, mStartY));
                                 buildRotateAnimation((int) animDiff, DEFAULT_DURATION_SHORT);
                                 rotateAnimator.start();
                                 Log.d("newOne", "i = " + i);
-                                Log.d("newOne", "(float) animDiff = " + (float)animDiff);
+                                Log.d("newOne", "(float) animDiff = " + (float) animDiff);
                                 break;
                             }
                         }
                     }
-
                     break;
             }
             // set the touched quadrant to true
@@ -426,7 +424,7 @@ public class CustomCircleMenu extends View {
 
     public void setNumberOfSectors(int numberOfSectors) {
         if (numberOfSectors == 0)
-            throw new IllegalArgumentException("Amount of sectors can not be equal zero");
+            throw new IllegalArgumentException(WARN_AMOUNT_OF_SECTORS);
         this.mNumberOfSectors = numberOfSectors;
         mAngleOneSector = 360 / numberOfSectors;
         mStartAngle = -90 - mAngleOneSector / 2;
@@ -453,9 +451,9 @@ public class CustomCircleMenu extends View {
 
     public void setIconsForMenu(List<Integer> iconsForMenu) {
         if (getNumberOfSectors() == 0)
-            throw new IllegalArgumentException("Amount of sectors can not be equal zero");
+            throw new IllegalArgumentException(WARN_AMOUNT_OF_SECTORS);
         if (iconsForMenu.size() == 0 || iconsForMenu.size() != getNumberOfSectors())
-            throw new IllegalArgumentException("Length of list of icon for menu must be equal amount of sectors and can not be equal zero");
+            throw new IllegalArgumentException(WARN_AMOUNT_OF_ICONS);
         this.mIconsForMenu.clear();
         this.mIconsForMenu.addAll(iconsForMenu);
         if (iconsForMenu.size() != 0) {
