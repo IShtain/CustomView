@@ -30,8 +30,8 @@ public class CustomCircleMenu extends View {
     private final static int DEFAULT_DURATION_SHORT = 300;  //for chosen sector
     private final static int DEFAULT_DURATION_LONG = 1500;   //for fling
 
-    private final static int DEFAULT_CIRCLE_RADIUS = 100;
     private final static float DEFAULT_WIDTH_MAIN_BORDER = 15.0f;
+    private final static int DEFAULT_CIRCLE_RADIUS = 100;
     private final static int DEFAULT_AMOUNT_OF_SECTORS = 3;
     private final static int DEFAULT_CIRCLE_BACKGROUND_COLOR = Color.BLUE;
     private final static int DEFAULT_MAIN_BORDER_COLOR = Color.BLACK;
