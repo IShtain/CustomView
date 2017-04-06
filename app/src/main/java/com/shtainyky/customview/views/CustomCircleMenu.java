@@ -72,10 +72,10 @@ public class CustomCircleMenu extends View {
     public CustomCircleMenu(Context context) {
         super(context);
         gestureDetector = new GestureDetector(context, new MyGestureListener());
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         mBackgroundColor = DEFAULT_CIRCLE_BACKGROUND_COLOR;
         mColorMainBorder = DEFAULT_MAIN_BORDER_COLOR;
         mColorChosenSector = DEFAULT_CHOSEN_SECTOR_COLOR;
@@ -83,6 +83,7 @@ public class CustomCircleMenu extends View {
         mCircleRadius = DEFAULT_CIRCLE_RADIUS;
         mWidthMainBorder = DEFAULT_WIDTH_MAIN_BORDER;
         mNumberOfSectors = DEFAULT_AMOUNT_OF_SECTORS;
+        initMainUtil(context);
     }
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs) {
