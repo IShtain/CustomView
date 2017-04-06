@@ -244,7 +244,7 @@ public class CustomCircleMenu extends View {
     public boolean onTouchEvent(MotionEvent event) {
         float touchRadius = (float) Math.sqrt(Math.pow(event.getX() - mCenterX, 2)
                 + Math.pow(event.getY() - mCenterY, 2));
-        //all movement inside circle
+        //all movement must be inside circle
         if (touchRadius < mCircleRadius) {
             gestureDetector.onTouchEvent(event);
             switch (event.getAction()) {
