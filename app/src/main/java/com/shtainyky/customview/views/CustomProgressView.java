@@ -108,7 +108,7 @@ public class CustomProgressView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int size =  mLengthSquareSide + mDistanceBetweenSquares;
+        int size = mLengthSquareSide + mDistanceBetweenSquares;
         int width = resolveSizeAndState(size, widthMeasureSpec, 0);
         int height = resolveSizeAndState(size, heightMeasureSpec, 0);
 
@@ -118,9 +118,13 @@ public class CustomProgressView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mCenterX = getWidth() / 2 - mLengthSquareSide/2;
-        mCenterY = getHeight() / 2 - mLengthSquareSide/2;
-        //initialization coordinates for small squares
+        mCenterX = getWidth() / 2 - mLengthSquareSide / 2;
+        mCenterY = getHeight() / 2 - mLengthSquareSide / 2;
+        initPoints();
+    }
+
+    //initialization coordinates for small squares
+    private void initPoints() {
         mLeftTopX = mCenterX - mDistanceBetweenSquares / 2;
         mLeftTopY = mCenterY - mDistanceBetweenSquares / 2;
         mRightTopX = mCenterX + mDistanceBetweenSquares / 2;
@@ -185,24 +189,26 @@ public class CustomProgressView extends View {
 
     /* public methods for starting and canceling animation */
     public void startAnimation() {
+        this.setVisibility(VISIBLE);
         mShouldStartEscalationSquareAnimation = true;
         mShouldStartConvolutionSquareAnimation = true;
         startConvolutionSquareAnimation();
     }
 
-    public void cancelAnimation() {
-        Log.d("myLog", "cancelAnimation ");
+    public void cancelAndHideAnimation() {
+        Log.d("myLog", "cancelAndHideAnimation ");
         mShouldStartEscalationSquareAnimation = false;
         mShouldStartConvolutionSquareAnimation = false;
-        if (mAnimatorSetFirst != null && (mAnimatorSetFirst.isStarted() || mAnimatorSetFirst.isRunning())) {
+        if (mAnimatorSetFirst != null && mAnimatorSetFirst.isStarted()) {
             mAnimatorSetFirst.cancel();
-            Log.d("myLog", " cancelAnimation mAnimatorSetFirst");
-
+            Log.d("myLog", " cancelAndHideAnimation mAnimatorSetFirst");
         }
-        if (mAnimatorSetSecond != null && (mAnimatorSetSecond.isStarted() || mAnimatorSetSecond.isRunning())) {
+        if (mAnimatorSetSecond != null && mAnimatorSetSecond.isStarted()) {
             mAnimatorSetSecond.cancel();
-            Log.d("myLog", "cancelAnimation mAnimatorSetSecond");
+            Log.d("myLog", "cancelAndHideAnimation mAnimatorSetSecond");
         }
+        initPoints();
+        this.setVisibility(GONE);
     }
 
     /* getters and setters*/
@@ -287,7 +293,7 @@ public class CustomProgressView extends View {
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                Log.d("myLog", "cancelAnimation mAnimatorSetFirst");
+                Log.d("myLog", "cancelAndHideAnimation mAnimatorSetFirst");
             }
 
             @Override
@@ -496,7 +502,7 @@ public class CustomProgressView extends View {
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                Log.d("myLog", "cancelAnimation mAnimatorSetSecond");
+                Log.d("myLog", "cancelAndHideAnimation mAnimatorSetSecond");
             }
 
             @Override
