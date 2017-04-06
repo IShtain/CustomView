@@ -12,6 +12,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,12 +29,22 @@ public class CustomCircleMenu extends View {
 
     private final static int DEFAULT_DURATION_SHORT = 300;  //for chosen sector
     private final static int DEFAULT_DURATION_LONG = 1500;   //for fling
+
+    private final static int DEFAULT_CIRCLE_RADIUS = 100;
+    private final static float DEFAULT_WIDTH_MAIN_BORDER = 15.0f;
+    private final static int DEFAULT_AMOUNT_OF_SECTORS = 3;
+    private final static int DEFAULT_CIRCLE_BACKGROUND_COLOR = Color.BLUE;
+    private final static int DEFAULT_MAIN_BORDER_COLOR = Color.BLACK;
+    private final static int DEFAULT_CHOSEN_SECTOR_COLOR = Color.WHITE;
+    private final static int DEFAULT_INNER_CIRCLE_COLOR = Color.RED;
+
     private final static String WARN_AMOUNT_OF_SECTORS = "Amount of sectors can not be equal zero";
     private final static String WARN_AMOUNT_OF_ICONS = "Size of list of icon for menu must be equal amount of sectors and can not be equal zero";
 
     private int mBackgroundColor;
     private int mColorMainBorder;
     private int mColorChosenSector;
+    private int mColorInnerCircle;
     private int mCircleRadius;
     private int mNumberOfSectors;
     private float mWidthMainBorder;
@@ -61,41 +72,51 @@ public class CustomCircleMenu extends View {
     public CustomCircleMenu(Context context) {
         super(context);
         gestureDetector = new GestureDetector(context, new MyGestureListener());
-        init(context);
+        init();
+    }
+
+    private void init() {
+        mBackgroundColor = DEFAULT_CIRCLE_BACKGROUND_COLOR;
+        mColorMainBorder = DEFAULT_MAIN_BORDER_COLOR;
+        mColorChosenSector = DEFAULT_CHOSEN_SECTOR_COLOR;
+        mColorInnerCircle = DEFAULT_INNER_CIRCLE_COLOR;
+        mCircleRadius = DEFAULT_CIRCLE_RADIUS;
+        mWidthMainBorder = DEFAULT_WIDTH_MAIN_BORDER;
+        mNumberOfSectors = DEFAULT_AMOUNT_OF_SECTORS;
     }
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context, attrs);
-        init(context);
     }
 
     public CustomCircleMenu(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         gestureDetector = new GestureDetector(context, new MyGestureListener());
         init(context, attrs);
-        init(context);
+
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
         TypedArray attributes = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.CustomCircleMenu, 0, 0);
         try {
-            mBackgroundColor = attributes.getColor(R.styleable.CustomCircleMenu_backgroundColor, 0);
-            mColorMainBorder = attributes.getColor(R.styleable.CustomCircleMenu_colorMainBorder, 0);
-            mColorChosenSector = attributes.getColor(R.styleable.CustomCircleMenu_colorChosenSector, 0);
-            mCircleRadius = attributes.getInteger(R.styleable.CustomCircleMenu_circleRadius, 0);
-            mWidthMainBorder = attributes.getFloat(R.styleable.CustomCircleMenu_widthMainBorder, 0);
-            mNumberOfSectors = attributes.getInteger(R.styleable.CustomCircleMenu_numberOfSectors, 0);
+            mBackgroundColor = attributes.getColor(R.styleable.CustomCircleMenu_backgroundColor, DEFAULT_CIRCLE_BACKGROUND_COLOR);
+            mColorMainBorder = attributes.getColor(R.styleable.CustomCircleMenu_colorMainBorder, DEFAULT_MAIN_BORDER_COLOR);
+            mColorChosenSector = attributes.getColor(R.styleable.CustomCircleMenu_colorChosenSector, DEFAULT_CHOSEN_SECTOR_COLOR);
+            mColorInnerCircle = attributes.getColor(R.styleable.CustomCircleMenu_colorInnerCircle, DEFAULT_INNER_CIRCLE_COLOR);
+            mCircleRadius = attributes.getInteger(R.styleable.CustomCircleMenu_circleRadius, DEFAULT_CIRCLE_RADIUS);
+            mWidthMainBorder = attributes.getFloat(R.styleable.CustomCircleMenu_widthMainBorder, DEFAULT_WIDTH_MAIN_BORDER);
+            mNumberOfSectors = attributes.getInteger(R.styleable.CustomCircleMenu_numberOfSectors, DEFAULT_AMOUNT_OF_SECTORS);
 
         } finally {
             attributes.recycle();
         }
+        initMainUtil(context);
     }
 
-
-    private void init(Context context) {
+    private void initMainUtil(Context context) {
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mMatrix = new Matrix();
         mRectF = new RectF();
@@ -190,8 +211,8 @@ public class CustomCircleMenu extends View {
     private RectF putBitmapTo(int angle) {
         float locationX = (float) (mCenterX + ((mCircleRadius / 17 * 11) * Math.cos(Math.toRadians(angle))));
         float locationY = (float) (mCenterY + ((mCircleRadius / 17 * 11) * Math.sin(Math.toRadians(angle))));
-        RectF rectF = new RectF(locationX - mCircleRadius/8, locationY - mCircleRadius/8,
-                locationX + mCircleRadius/8, locationY + mCircleRadius/8);
+        RectF rectF = new RectF(locationX - mCircleRadius / 8, locationY - mCircleRadius / 8,
+                locationX + mCircleRadius / 8, locationY + mCircleRadius / 8);
 
         mMatrix.reset();
         mMatrix.setRotate(angle, locationX, locationY);
@@ -202,7 +223,7 @@ public class CustomCircleMenu extends View {
     private void drawInnerCircle(Canvas canvas) {
         //draw inner circle
         mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mBackgroundPaint.setColor(Color.RED);
+        mBackgroundPaint.setColor(mColorInnerCircle);
         canvas.drawCircle(mCenterX, mCenterY, mCircleRadius / 6, mBackgroundPaint);
         mBackgroundPaint.setStyle(Paint.Style.STROKE);
         mBackgroundPaint.setColor(mColorChosenSector);
@@ -225,8 +246,7 @@ public class CustomCircleMenu extends View {
         //all movement inside circle
         if (touchRadius < mCircleRadius) {
             gestureDetector.onTouchEvent(event);
-            int action = MotionEventCompat.getActionMasked(event);
-            switch (action) {
+            switch (event.getAction()) {
                 case (MotionEvent.ACTION_DOWN):
                     Log.d("newOne", "Action was ACTION_DOWN");
                     //reset rotating
@@ -256,7 +276,6 @@ public class CustomCircleMenu extends View {
 
                 case (MotionEvent.ACTION_UP):
                     Log.d("newOne", "Action was ACTION_UP");
-                    Log.d("newOne", "Action was ACTION_UP getAngle(mStartX, mStartY)" + getAngle(mStartX, mStartY));
                     if (mStartX == event.getX() && mStartY == event.getY()) {
                         if (mStartAngle < 0)
                             mStartAngle = mStartAngle + 360;  //turn mStartAngle between 0 and 360 degrees
@@ -336,14 +355,12 @@ public class CustomCircleMenu extends View {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                float velocityY) {
-            if (mStartAngle > 360 || mStartAngle < -360)
-                mStartAngle = mStartAngle % 360;
             buildRotateAnimation((int) (getDirectionSign(e1, e2) * Math.abs(velocityX + velocityY)), DEFAULT_DURATION_LONG);
             rotateAnimator.start();
             Log.d("newOne", "onFling");
             return true;
         }
-
+        //returns +1 if rotating clockwise direction
         private int getDirectionSign(MotionEvent e1, MotionEvent e2) {
             double fromAngle = getAngle(e1.getX(), e1.getY());
             double toAngle = getAngle(e2.getX(), e2.getY());
@@ -456,11 +473,9 @@ public class CustomCircleMenu extends View {
             throw new IllegalArgumentException(WARN_AMOUNT_OF_ICONS);
         this.mIconsForMenu.clear();
         this.mIconsForMenu.addAll(iconsForMenu);
-        if (iconsForMenu.size() != 0) {
-            for (int i = 0; i < iconsForMenu.size(); i++) {
-                mBitmaps.add(BitmapFactory
-                        .decodeResource(mResources, iconsForMenu.get(i)));
-            }
+        for (int i = 0; i < iconsForMenu.size(); i++) {
+            mBitmaps.add(BitmapFactory
+                    .decodeResource(mResources, iconsForMenu.get(i)));
         }
         invalidate();
     }

@@ -4,6 +4,7 @@
         <attr name="backgroundColor" format="color"/>
         <attr name="colorChosenSector" format="color"/>
         <attr name="colorMainBorder" format="color"/>
+        <attr name="colorInnerCircle" format="color"/>
         <attr name="widthMainBorder" format="float"/>
 
         <attr name="circleRadius" format="integer"/>
