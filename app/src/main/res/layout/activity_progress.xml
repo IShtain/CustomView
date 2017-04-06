@@ -6,7 +6,7 @@
                 android:orientation="vertical">
 
     <com.shtainyky.customview.views.CustomProgressView
-        android:id="@+id/progress"
+        android:id="@+id/my_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -30,7 +30,8 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
             android:text="@string/start_animation"
-            android:background="@color/colorPrimary"/>
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"/>
         <Button
             android:id="@+id/bt_stop"
             android:layout_width="0dp"
@@ -38,7 +39,8 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_weight="1"
             android:text="@string/stop_animation"
-            android:background="@color/colorPrimary"/>
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"/>
 
     </LinearLayout>
 

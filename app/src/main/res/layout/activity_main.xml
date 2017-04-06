@@ -39,6 +39,7 @@
         android:layout_marginTop="30dp"
         android:background="@color/colorAccent"
         android:text="@string/test_progress"
+        android:textColor="@android:color/white"
         />
 
 

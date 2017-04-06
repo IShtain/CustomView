@@ -10,6 +10,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -23,6 +25,8 @@ public class CustomProgressView extends View {
 
     private final static int DEFAULT_DURATION_SHORT = 300;  //for moving
     private final static int DEFAULT_DURATION_LONG = 500;   //for blinking
+    private final static int STATE_IS_ANIMATED = 101;
+    private final static int STATE_IS_CANCELED = 102;
 
     private final static int DEFAULT_BACKGROUND_SMALL_SQUARE_COLOR = R.color.colorAccent;
     private final static int DEFAULT_BACKGROUND_BIG_SQUARE_COLOR = R.color.colorAccent;
@@ -55,6 +59,7 @@ public class CustomProgressView extends View {
     private AnimatorSet mAnimatorSetSecond;
     private boolean mShouldStartEscalationSquareAnimation;
     private boolean mShouldStartConvolutionSquareAnimation;
+    private int mAnimatedState = 100;
 
     public CustomProgressView(Context context) {
         super(context);
@@ -99,6 +104,7 @@ public class CustomProgressView extends View {
     }
 
     private void initMainUtil() {
+        setSaveEnabled(true);
         mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mInnerSquarePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -121,6 +127,9 @@ public class CustomProgressView extends View {
         mCenterX = getWidth() / 2 - mLengthSquareSide / 2;
         mCenterY = getHeight() / 2 - mLengthSquareSide / 2;
         initPoints();
+        if (mAnimatedState == STATE_IS_ANIMATED) startAnimation();
+        if (mAnimatedState == STATE_IS_CANCELED) cancelAnimationAndHide();
+
     }
 
     //initialization coordinates for small squares
@@ -190,26 +199,47 @@ public class CustomProgressView extends View {
     /* public methods for starting and canceling animation */
     public void startAnimation() {
         this.setVisibility(VISIBLE);
+        if (!mShouldStartEscalationSquareAnimation && !mShouldStartConvolutionSquareAnimation) {
+            startConvolutionSquareAnimation();
+            mAnimatedState = STATE_IS_ANIMATED;
+        }
         mShouldStartEscalationSquareAnimation = true;
         mShouldStartConvolutionSquareAnimation = true;
-        startConvolutionSquareAnimation();
+
     }
 
-    public void cancelAndHideAnimation() {
-        Log.d("myLog", "cancelAndHideAnimation ");
+    public void cancelAnimationAndHide() {
+        Log.d("myLog", "cancelAnimationAndHide ");
         mShouldStartEscalationSquareAnimation = false;
         mShouldStartConvolutionSquareAnimation = false;
         if (mAnimatorSetFirst != null && mAnimatorSetFirst.isStarted()) {
             mAnimatorSetFirst.cancel();
-            Log.d("myLog", " cancelAndHideAnimation mAnimatorSetFirst");
+            Log.d("myLog", " cancelAnimationAndHide mAnimatorSetFirst");
         }
         if (mAnimatorSetSecond != null && mAnimatorSetSecond.isStarted()) {
             mAnimatorSetSecond.cancel();
-            Log.d("myLog", "cancelAndHideAnimation mAnimatorSetSecond");
+            Log.d("myLog", "cancelAnimationAndHide mAnimatorSetSecond");
         }
+        mAnimatedState = STATE_IS_CANCELED;
         initPoints();
         this.setVisibility(GONE);
     }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState savedState = new SavedState(superState);
+        savedState.setValue(mAnimatedState);
+        return savedState;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState savedState = (SavedState) state;
+        super.onRestoreInstanceState(savedState.getSuperState());
+        mAnimatedState = savedState.getValue();
+    }
+
 
     /* getters and setters*/
 
@@ -293,7 +323,7 @@ public class CustomProgressView extends View {
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                Log.d("myLog", "cancelAndHideAnimation mAnimatorSetFirst");
+                Log.d("myLog", "cancelAnimationAndHide mAnimatorSetFirst");
             }
 
             @Override
@@ -502,7 +532,7 @@ public class CustomProgressView extends View {
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                Log.d("myLog", "cancelAndHideAnimation mAnimatorSetSecond");
+                Log.d("myLog", "cancelAnimationAndHide mAnimatorSetSecond");
             }
 
             @Override
@@ -627,6 +657,44 @@ public class CustomProgressView extends View {
             }
         });
         return moveReverseLeftTopYAnimator;
+    }
+
+    private static class SavedState extends BaseSavedState {
+        private int value; //this will store the current value from ValueBar
+
+        int getValue() {
+            return value;
+        }
+
+        void setValue(int value) {
+            this.value = value;
+        }
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            value = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(value);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 
 

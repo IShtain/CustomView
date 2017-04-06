@@ -13,7 +13,7 @@ public class ActivityProgress extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress);
-        final CustomProgressView progressView = (CustomProgressView) findViewById(R.id.progress);
+        final CustomProgressView progressView = (CustomProgressView) findViewById(R.id.my_progress);
         Button bt_start = (Button) findViewById(R.id.bt_start);
         bt_start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -26,7 +26,7 @@ public class ActivityProgress extends AppCompatActivity {
         bt_stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressView.cancelAndHideAnimation();
+                progressView.cancelAnimationAndHide();
             }
         });
 
